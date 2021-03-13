@@ -25,7 +25,7 @@ if not img_dir.is_dir():
 
 img_paths = []
 for f in Path(img_dir).iterdir():
-    if f.is_file and imghdr.what(f):
+    if f.is_file() and imghdr.what(f):
         img_paths.append(f)
 
 img = Image.open(random.choice(img_paths))
