@@ -32,6 +32,7 @@ img = Image.open(random.choice(img_paths))
 img = img.convert('RGBA')
 img = np.asarray(img)
 
+ansi_str = ''
 for i in range(img.shape[0]):
     for j in range(img.shape[1]):
         pixel = img[i, j, :]
@@ -40,9 +41,11 @@ for i in range(img.shape[0]):
         blue = pixel[2]
         alpha = pixel[3]
         if alpha:
-            system(f'printf "\x1b[38;2;{red};{green};{blue}m{PIXEL_CHAR}\x1b[0m"')
+            ansi_str += f'\x1b[38;2;{red};{green};{blue}m{PIXEL_CHAR}\x1b[0m'
         else:
-            system(f'printf "  "')
-    print('')
+            ansi_str += '  '
+    ansi_str += '\n'
 
-print('\n')
+ansi_str += '\n'
+
+system(f'printf "{ansi_str}"')
