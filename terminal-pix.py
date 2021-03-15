@@ -12,23 +12,32 @@ PIXEL_CHAR = '██'
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('img_dir',
-                    metavar='img-dir',
+parser.add_argument('img_path',
+                    metavar='img-path',
                     type=Path,
-                    help="directory to randomly select image from")
+                    help="path to an image file or a directory containing image files to randomly select image from")
 
 args = parser.parse_args()
-img_dir = args.img_dir
+img_path = args.img_path
 
-if not img_dir.is_dir():
-    raise NotADirectoryError(f"No directory: {img_dir}")
+if img_path.is_dir():
+    img_paths = []
+    for f in Path(img_path).iterdir():
+        if f.is_file() and imghdr.what(f):
+            img_paths.append(f)
 
-img_paths = []
-for f in Path(img_dir).iterdir():
-    if f.is_file() and imghdr.what(f):
-        img_paths.append(f)
+    if not img_paths:
+        raise FileNotFoundError(f"No image files found in directory: {img_path}")
 
-img = Image.open(random.choice(img_paths))
+    img = Image.open(random.choice(img_paths))
+elif img_path.is_file():
+    if not imghdr.what(img_path):
+        raise TypeError(f"File is not a supported image file type: {img_path}")
+
+    img = Image.open(img_path)
+else:
+    raise FileNotFoundError(f"No file or directory: {img_path}")
+
 img = img.convert('RGBA')
 img = np.asarray(img)
 
