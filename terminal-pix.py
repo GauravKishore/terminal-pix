@@ -2,10 +2,9 @@
 
 import argparse
 import imghdr
-import numpy as np
 import random
 from os import system
-from PIL import Image, UnidentifiedImageError
+from PIL import Image
 from pathlib import Path
 
 PIXEL_CHAR = '██'
@@ -15,7 +14,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('img_path',
                     metavar='img-path',
                     type=Path,
-                    help="path to an image file or a directory containing image files to randomly select image from")
+                    help="path to an image file or a directory containing image files to randomly "
+                         "select an image from")
 
 args = parser.parse_args()
 img_path = args.img_path
@@ -39,17 +39,13 @@ else:
     raise FileNotFoundError(f"No file or directory: {img_path}")
 
 img = img.convert('RGBA')
-img = np.asarray(img)
+width, height = img.size
 
-for i in range(img.shape[0]):
+for y in range(height):
     ansi_str = ''
-    for j in range(img.shape[1]):
-        pixel = img[i, j, :]
-        red = pixel[0]
-        green = pixel[1]
-        blue = pixel[2]
-        alpha = pixel[3]
-        if alpha:
+    for x in range(width):
+        red, green, blue, alpha = img.getpixel((x, y))
+        if alpha == 255:
             ansi_str += f'\x1b[38;2;{red};{green};{blue}m{PIXEL_CHAR}\x1b[0m'
         else:
             ansi_str += '  '
