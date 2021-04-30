@@ -7,8 +7,9 @@ from os import system
 from PIL import Image
 from pathlib import Path
 
-PIXEL_CHAR = '██'
-
+UPPER_BLOCK = '▀'
+LOWER_BLOCK = '▄'
+EMPTY = ' '
 parser = argparse.ArgumentParser()
 
 parser.add_argument('img_path',
@@ -41,14 +42,33 @@ else:
 img = img.convert('RGBA')
 width, height = img.size
 
-for y in range(height):
-    ansi_str = ''
+print()
+
+for y in range(0, height, 2):
+    ansi_str = ' '
     for x in range(width):
-        red, green, blue, alpha = img.getpixel((x, y))
-        if alpha == 255:
-            ansi_str += f'\x1b[38;2;{red};{green};{blue}m{PIXEL_CHAR}\x1b[0m'
+        red_upper, green_upper, blue_upper, alpha_upper = img.getpixel((x, y))
+        if (y + 1 < height):
+            red_lower, green_lower, blue_lower, alpha_lower = img.getpixel((x, y + 1))
         else:
-            ansi_str += '  '
+            red_lower, green_lower, blue_lower, alpha_lower = 0, 0, 0, 0
+
+        if alpha_upper == 255 and alpha_lower == 255:
+            pixel_char = UPPER_BLOCK
+            ansi_fg = f'{red_upper};{green_upper};{blue_upper}'
+            ansi_bg = f'{red_lower};{green_lower};{blue_lower}'
+            ansi_str += f'\x1b[38;2;{ansi_fg};48;2;{ansi_bg}m{pixel_char}\x1b[0m'
+        elif alpha_upper == 255:
+            pixel_char = UPPER_BLOCK
+            ansi_fg = f'{red_upper};{green_upper};{blue_upper}'
+            ansi_str += f'\x1b[38;2;{ansi_fg}m{pixel_char}\x1b[0m'
+        elif alpha_lower == 255:
+            pixel_char = LOWER_BLOCK
+            ansi_bg = f'{red_lower};{green_lower};{blue_lower}'
+            ansi_str += f'\x1b[38;2;{ansi_bg}m{pixel_char}\x1b[0m'
+        else:
+            ansi_str += ' '
+
     ansi_str += '\n'
     system(f'printf "{ansi_str}"')
 
