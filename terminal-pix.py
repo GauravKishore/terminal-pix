@@ -23,7 +23,7 @@ img_path = args.img_path
 
 if img_path.is_dir():
     img_paths = []
-    for f in Path(img_path).iterdir():
+    for f in Path(img_path).rglob('*'):
         if f.is_file() and imghdr.what(f):
             img_paths.append(f)
 
